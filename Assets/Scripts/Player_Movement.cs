@@ -25,13 +25,30 @@ public class Player_Movement : MonoBehaviour
     public int maxHealth = 4;
     public int currentHealth;
 
+    public static float newTimeScale = 1;
+
+    public GameObject coinPickUp;
+    public GameObject coinPickUp2;
+    public GameObject coinPickUp3;
+    public GameObject healthPickUp;
+    public GameObject healthPickUp2;
+
+    AudioSource audioSource;
+
+    public AudioClip damageTake;
+    public AudioClip GameOverS;
+    public AudioClip coinCollect;
+    public AudioClip healthCollect;
+
     // Start is called before the first frame update
     void Start()
     {
-        Rigidbody.AddForce(0, 0, 30000 * Time.deltaTime);
+        //Rigidbody.AddForce(0, 0, 30000 * Time.deltaTime);
 
         currentHealth = maxHealth;
         healthBar.setMaxHealth(maxHealth);
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -57,6 +74,20 @@ public class Player_Movement : MonoBehaviour
             Rigidbody.AddForce(0, 0, -Speed * Time.deltaTime, ForceMode.VelocityChange);
         }
 
+        
+        //Debug
+        if (Input.GetKey("v"))
+        {
+            //FindObjectOfType<GameOver>().EndGame();
+        }
+        if (Input.GetKey("m"))
+        {
+            //FindObjectOfType<Stage>().ResetHighScore();
+
+        }
+
+
+
         PlayerReturning();
     }
 
@@ -70,6 +101,11 @@ public class Player_Movement : MonoBehaviour
 
     void OnCollisionEnter(Collision col)
     {
+        if (col.collider.tag == "Start")
+        {
+            Time.timeScale = 1f;
+        }
+
         if (col.collider.tag == "Bottom")
         {
             //Rigidbody.AddForce(0, 1000000 * Time.deltaTime, 0);
@@ -78,14 +114,63 @@ public class Player_Movement : MonoBehaviour
 
         if (col.collider.tag == "Top")
         {
-            transform.position = new Vector3(55, 10, 12);
+            transform.position = new Vector3(186, 10, 12);
             bottomHit = false;
             Stage.stageLevel++;
+            ResetPickups();
+        }
+
+        if (col.collider.tag == "TopS2")
+        {
+            transform.position = new Vector3(337, 10, 12);
+            bottomHit = false;
+            Stage.stageLevel++;
+            ResetPickups();
+        }
+
+        if (col.collider.tag == "TopS3")
+        {
+            transform.position = new Vector3(0, 10, 12);
+            bottomHit = false;
+            Stage.stageLevel = 1;
+            Stage.worldLevel++;
+            ResetPickups();
+            FindObjectOfType<Stage>().NextWorld();
+            Time.timeScale += 0.2f;
+            newTimeScale = Time.timeScale;
         }
 
         if (col.collider.tag == "Obstacle")
         {
-            TakeDamage(1);   
+            TakeDamage(1);
+        }
+
+    }
+
+    void OnTriggerEnter(Collider col)
+    {
+        if (col.tag == "Coin")
+        {
+            coinPickUp.SetActive(false);
+            coinPickUp2.SetActive(false);
+            coinPickUp3.SetActive(false);
+            audioSource.PlayOneShot(coinCollect, 0.2F);
+            FindObjectOfType<Score>().CoinPickUp();
+
+            //Debug.Log("Coin picked up");
+        }
+        if (col.tag == "Health")
+        {
+            if (currentHealth < 4)
+            {
+                currentHealth++;
+                healthBar.SetHealth(currentHealth);
+                audioSource.PlayOneShot(healthCollect, 0.2F);
+                healthPickUp.SetActive(false);
+                healthPickUp2.SetActive(false);
+
+                //Debug.Log("health restored");
+            }
         }
     }
 
@@ -98,7 +183,36 @@ public class Player_Movement : MonoBehaviour
         if (currentHealth <= 0)
         {
             FindObjectOfType<GameOver>().EndGame();
+            //audioSource.PlayOneShot(GameOverS, 0.5F);
         }
+        else
+        {
+            audioSource.PlayOneShot(damageTake, 0.5F);
+        }
+    }
+
+    public void ResetPhysics()
+    {
+        bottomHit = false;
+    }
+
+    public void ResetHealth()
+    {
+        currentHealth = 4;
+    }
+
+    public void ResetPickups()
+    {
+        coinPickUp.SetActive(true);
+        coinPickUp2.SetActive(true);
+        coinPickUp3.SetActive(true);
+        healthPickUp.SetActive(true);
+        healthPickUp2.SetActive(true);
+    }
+
+    public void GameOverSound()
+    {
+        audioSource.PlayOneShot(GameOverS, 0.5F);
     }
 }
 

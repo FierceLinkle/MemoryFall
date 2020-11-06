@@ -25,6 +25,7 @@ public class MovingPlatform : MonoBehaviour
     {
         timer += Time.deltaTime;
 
+        //moves platform between two points back and forth
         transform.position = Vector3.Lerp(Left.position, Right.position, Mathf.PingPong(timer * speed, t));
     }
 }

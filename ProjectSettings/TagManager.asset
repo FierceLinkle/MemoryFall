@@ -7,6 +7,11 @@ TagManager:
   - Obstacle
   - Bottom
   - Top
+  - TopS2
+  - TopS3
+  - Start
+  - Coin
+  - Health
   layers:
   - Default
   - TransparentFX
